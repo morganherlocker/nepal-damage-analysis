@@ -51,7 +51,7 @@ Object.keys(tiles).forEach(function(tile){
 
 fs.writeFileSync(__dirname+'/data/tiles.geojson', JSON.stringify(fc));
 fs.writeFileSync(__dirname+'/data/tiles.json', JSON.stringify(tiles));
-
+console.log(Object.keys(tiles).length)
 function id (tile){
   return tile[0] + '/' + tile[1] + '/' + tile[2];
 }
