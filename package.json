@@ -19,6 +19,7 @@
   "dependencies": {
     "geojson-flatten": "^0.1.0",
     "geojson-normalize": "0.0.0",
+    "queue-async": "^1.0.7",
     "tile-cover": "^2.4.1",
     "tile-reduce": "^1.0.0",
     "tilebelt": "^0.7.1",

@@ -1,13 +1,21 @@
 var TileReduce = require('tile-reduce');
 var turf = require('turf');
+var cover = require('tile-cover');
+var queue = require('queue-async');
+var fs = require('fs');
+
+// delete old data
+if(fs.existsSync(__dirname+'/../data/buildings.geojson')) fs.unlinkSync(__dirname+'/../data/buildings.geojson');
+if(fs.existsSync(__dirname+'/../data/roads.geojson')) fs.unlinkSync(__dirname+'/../data/roads.geojson');
+fs.appendFileSync(__dirname+'/../data/roads.geojson', '{"type": "FeatureCollection","features": [');
+fs.appendFileSync(__dirname+'/../data/buildings.geojson', '{"type": "FeatureCollection","features": [');
 
 var bbox = [
-  81.73828125,
-  25.562265014427492,
-  87.64892578125,
-  30.751277776257812
+    81.925048828125,
+    25.681137335685307,
+    87.593994140625,
+    30.704058230919504
   ];
-
 
 var opts = {
   zoom: 15,
@@ -18,27 +26,50 @@ var opts = {
         layers: ['building', 'road', 'bridge', 'tunnel']
       }
     ],
-  map: __dirname+'/trace.js'
+  map: __dirname+'/conflate.js'
 };
 
-var tilereduce = TileReduce(bbox, opts);
+var jobZoom = 12;
+var jobs = cover.tiles(turf.bboxPolygon(bbox).geometry, {min_zoom: jobZoom, max_zoom: jobZoom});
+var jobCount = 0;
 
-var layers = {
-  buildings: turf.featurecollection([]),
-  roads: turf.featurecollection([])
-};
-
-tilereduce.on('start', function(tiles){
-  console.log('processing ' + tiles.length + ' tiles')
+console.log(jobs.length+' jobs to process\n==============');
+var q = queue(1);
+jobs.forEach(function(job){
+  q.defer(processJob, job);
 });
 
-tilereduce.on('reduce', function(result){
-  layers.buildings.features = layers.buildings.features.concat(result.buildings.features);
-  layers.roads.features = layers.roads.features.concat(result.roads.features);
+q.awaitAll(function(err, res){
+  console.log('COMPLETE')
+  console.log('processed '+jobs.length*256+' tiles in '+ jobs.length +' jobs');
+  fs.appendFileSync(__dirname+'/../data/roads.geojson', ']}');
+  fs.appendFileSync(__dirname+'/../data/buildings.geojson', ']}');
 });
 
-tilereduce.on('end', function(error){
-  console.log(JSON.stringify(missing));
-});
+function processJob(job, done) {
+  jobCount++;
+  var tilereduce = TileReduce(job, opts);
 
-tilereduce.run();
+  tilereduce.on('start', function(tiles){
+    console.log('job '+job.join('/'));
+    console.log(jobCount+' / '+jobs.length+' complete')
+    console.log('processing ' + tiles.length + ' tiles\n-------------');
+  });
+
+  tilereduce.on('reduce', function(layers){
+    //if(layers.roads.features.length) console.log(layers.roads.features.length + ' roads');
+    //if(layers.buildings.features.length) console.log(layers.buildings.features.length + ' buildings');
+    layers.roads.features.forEach(function(road){
+      fs.appendFileSync(__dirname+'/../data/roads.geojson', JSON.stringify(road)+',');
+    });
+    layers.buildings.features.forEach(function(building){
+      fs.appendFileSync(__dirname+'/../data/buildings.geojson', JSON.stringify(building)+',');
+    });
+  });
+
+  tilereduce.on('end', function(error){
+    done();
+  });
+
+  tilereduce.run();
+}
