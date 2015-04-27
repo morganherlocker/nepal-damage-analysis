@@ -1,0 +1,27 @@
+{
+  "name": "nepal-damage-analysis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/morganherlocker/nepal-damage-analysis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/morganherlocker/nepal-damage-analysis/issues"
+  },
+  "homepage": "https://github.com/morganherlocker/nepal-damage-analysis",
+  "dependencies": {
+    "geojson-flatten": "^0.1.0",
+    "geojson-normalize": "0.0.0",
+    "tile-cover": "^2.4.1",
+    "tile-reduce": "^1.0.0",
+    "tilebelt": "^0.7.1",
+    "turf": "^2.0.2"
+  }
+}
