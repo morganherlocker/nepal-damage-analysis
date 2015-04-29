@@ -11,4 +11,12 @@ npm install
 node conflate/index.js
 ```
 
-This will create roads.geojson and buildings.geojson files in ./data. These large geojson files can be sent through tippecanoe for creating vector tile datasets. Processing will take several hours on a typical laptop, so a large multicore ec2 is recommended.
+This will create roads.geojson and buildings.geojson files in ./data. These large geojson files can be sent through [tippecanoe](https://github.com/mapbox/tippecanoe) for creating vector tile datasets. 
+
+```sh
+cd data
+cat buildings.geojson | tippecanoe -o buildings.mbtiles
+cat roads.geojson | tippecanoe -o roads.mbtiles
+```
+
+Processing the entire impact area will take several hours on a typical laptop, so a large multicore ec2 is recommended.
